@@ -2,6 +2,7 @@ import React from "react";
 import { API, graphqlOperation } from "aws-amplify";
 import { S3Image } from "aws-amplify-react";
 import { deleteProduct } from "../graphql/mutations";
+import { Link } from "react-router-dom";
 import { convertCentsToDollars } from "../utils";
 // prettier-ignore
 import { Notification, Popover, Button, Dialog, Card } from "element-react";
@@ -25,7 +26,7 @@ class Product extends React.Component {
         message: "Product successfully deleted!",
         type: "success"
       });
-      setTimeout(() => window.location.reload(), 3000);
+      // setTimeout(() => window.location.reload(), 3000);
     } catch (err) {
       console.error(`Failed to delete product with id: ${productId}`, err);
     }
@@ -37,8 +38,9 @@ class Product extends React.Component {
 
     return (
       <UserContext.Consumer>
-        {user => {
-          const isProductOwner = user && user.username === product.owner;
+        {({ user }) => {
+          const isProductOwner = user && user.attributes.sub === product.owner;
+          const emailVerified = user.attributes.email_verified;
 
           return (
             <div className="card-container">
@@ -55,8 +57,14 @@ class Product extends React.Component {
                     <span className="mx-1">
                       ${convertCentsToDollars(product.price)}
                     </span>
-                    {!isProductOwner && (
-                      <PayButton product={product} user={user} />
+                    {emailVerified ? (
+                      !isProductOwner && (
+                        <PayButton product={product} user={user} />
+                      )
+                    ) : (
+                      <Link to="/profile" className="link">
+                        Verify Email
+                      </Link>
                     )}
                   </div>
                 </div>

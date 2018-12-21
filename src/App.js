@@ -17,13 +17,14 @@ export const UserContext = React.createContext();
 
 class App extends React.Component {
   state = {
-    user: null
+    user: null,
+    userProfile: null
   };
 
   componentDidMount() {
     /* Log the AmplifyTheme in order to see all the stylable properties */
     // console.dir(AmplifyTheme);
-    this.getAuthUser();
+    this.getUserData();
     Hub.listen("auth", this, "onHubCapsule");
   }
 
@@ -31,7 +32,7 @@ class App extends React.Component {
     switch (capsule.payload.event) {
       case "signIn":
         console.log("signed in");
-        this.getAuthUser();
+        this.getUserData();
         this.registerNewUser(capsule.payload.data);
         break;
       case "signUp":
@@ -46,9 +47,17 @@ class App extends React.Component {
     }
   };
 
-  getAuthUser = async () => {
+  getUserData = async () => {
     const user = await Auth.currentAuthenticatedUser();
-    user ? this.setState({ user }) : this.setState({ user: null });
+    user
+      ? this.setState({ user }, () => this.getUserAttributes(this.state.user))
+      : this.setState({ user: null });
+  };
+
+  getUserAttributes = async authUserData => {
+    const userAttributes = await Auth.userAttributes(authUserData);
+    const attributesObj = Auth.attributesToObject(userAttributes);
+    this.setState({ userProfile: attributesObj });
   };
 
   registerNewUser = async signInData => {
@@ -62,6 +71,7 @@ class App extends React.Component {
         const registerUserInput = {
           ...getUserInput,
           username: signInData.username,
+          email: signInData.signInUserSession.idToken.payload.email,
           registered: true
         };
         const newUser = await API.graphql(
@@ -74,15 +84,21 @@ class App extends React.Component {
     }
   };
 
-  handleSignout = async () => await Auth.signOut();
+  handleSignout = async () => {
+    try {
+      await Auth.signOut();
+    } catch (err) {
+      console.error("Error signing out user", err);
+    }
+  };
 
   render() {
-    const { user } = this.state;
+    const { user, userProfile } = this.state;
 
     return !user ? (
       <Authenticator theme={theme} />
     ) : (
-      <UserContext.Provider value={user}>
+      <UserContext.Provider value={{ user, userProfile }}>
         <Router history={history}>
           <>
             {/* Navigation */}
@@ -93,7 +109,9 @@ class App extends React.Component {
               <Route exact path="/" component={HomePage} />
               <Route
                 path="/profile"
-                component={() => <ProfilePage user={user} />}
+                component={() => (
+                  <ProfilePage user={user} userProfile={userProfile} />
+                )}
               />
               <Route
                 path="/markets/:marketId"
@@ -135,6 +153,5 @@ const theme = {
 export default App;
 // export default withAuthenticator(App, true, [], null, myTheme);
 
-// O4398652@nwytg.net
-// O4406800@nwytg.net
-// O4409886@nwytg.net
+// O4827014@nwytg.net
+// Erc89021@ebbob.com

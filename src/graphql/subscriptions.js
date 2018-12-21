@@ -10,6 +10,7 @@ export const onCreateMarket = `subscription OnCreateMarket {
         id
         description
         price
+        shipped
         owner
         createdAt
       }
@@ -30,6 +31,7 @@ export const onUpdateMarket = `subscription OnUpdateMarket {
         id
         description
         price
+        shipped
         owner
         createdAt
       }
@@ -50,6 +52,7 @@ export const onDeleteMarket = `subscription OnDeleteMarket {
         id
         description
         price
+        shipped
         owner
         createdAt
       }
@@ -78,6 +81,7 @@ export const onCreateProduct = `subscription OnCreateProduct {
       key
     }
     price
+    shipped
     owner
     createdAt
   }
@@ -100,6 +104,7 @@ export const onUpdateProduct = `subscription OnUpdateProduct {
       key
     }
     price
+    shipped
     owner
     createdAt
   }
@@ -122,6 +127,7 @@ export const onDeleteProduct = `subscription OnDeleteProduct {
       key
     }
     price
+    shipped
     owner
     createdAt
   }

@@ -6,10 +6,12 @@ import { formatOrderDate, convertCentsToDollars } from "../utils";
 import { UserContext } from "../App";
 
 // Copy and bring in getUser query because queries file will be overwritten with any updates
+// NOTE! The 'product' part in order.items is added manually, along with sortDirection / limit on 'orders'
 const getUser = `query GetUser($id: ID!) {
   getUser(id: $id) {
     id
     username
+    email
     registered
     orders(sortDirection: DESC, limit: 999) {
       items {
@@ -32,7 +34,7 @@ const getUser = `query GetUser($id: ID!) {
 class ProfilePage extends React.Component {
   state = {
     orders: [],
-    email: "",
+    email: this.props.userProfile && this.props.userProfile.email,
     emailDialog: false,
     verificationCode: "",
     verificationForm: false,
@@ -44,11 +46,8 @@ class ProfilePage extends React.Component {
         width: "100",
         render: row => {
           if (row.name === "Email") {
-            return (
-              this.props.user.attributes.email_verified && (
-                <Tag type="success">Verified</Tag>
-              )
-            );
+            const emailVerified = this.props.user.attributes.email_verified;
+            return emailVerified && <Tag type="success">Verified</Tag>;
           }
         }
       },
@@ -84,16 +83,9 @@ class ProfilePage extends React.Component {
     ]
   };
 
-  async componentDidMount() {
-    if (this.props.user) {
-      try {
-        const userAttributes = await Auth.userAttributes(this.props.user);
-        const attributesObj = Auth.attributesToObject(userAttributes);
-        this.setState({ ...attributesObj });
-        this.getUserOrders(attributesObj);
-      } catch (err) {
-        console.error(err);
-      }
+  componentDidMount() {
+    if (this.props.userProfile) {
+      this.getUserOrders(this.props.userProfile);
     }
   }
 
@@ -152,7 +144,7 @@ class ProfilePage extends React.Component {
       );
       Notification({
         title: "Success",
-        message: "Email successfully verifiedd!",
+        message: "Email successfully verified!",
         type: `${result.toLowerCase()}`
       });
       setTimeout(() => window.location.reload(), 3000);
@@ -176,8 +168,9 @@ class ProfilePage extends React.Component {
 
     return (
       <UserContext.Consumer>
-        {user =>
-          user && (
+        {({ user, userProfile }) =>
+          user &&
+          userProfile && (
             <>
               <Tabs activeName="1" className="profile-tabs">
                 <Tabs.Pane
@@ -203,12 +196,11 @@ class ProfilePage extends React.Component {
                       },
                       {
                         name: "Email",
-                        value: user.attributes.email
+                        value: userProfile.email
                       },
                       {
                         name: "Phone Number",
-                        value: user.attributes.phone_number,
-                        tag: user.attributes.phone_verified && "Verified"
+                        value: userProfile.phone_number
                       },
                       {
                         name: "Delete Profile",
@@ -265,7 +257,10 @@ class ProfilePage extends React.Component {
                       />
                     </Form.Item>
                     {verificationForm && (
-                      <Form.Item label="Verification Code" labelWidth="120">
+                      <Form.Item
+                        label="Enter Verification Code"
+                        labelWidth="120"
+                      >
                         <Input
                           onChange={verificationCode =>
                             this.setState({ verificationCode })

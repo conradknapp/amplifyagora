@@ -21,7 +21,7 @@ class NewMarket extends React.Component {
       const input = {
         name: this.state.marketName,
         tags: this.state.selectedTags,
-        owner: user && user.username
+        owner: user.username
       };
       const result = await API.graphql(
         graphqlOperation(createMarket, { input })
@@ -48,15 +48,14 @@ class NewMarket extends React.Component {
 
     return (
       <UserContext.Consumer>
-        {user => (
+        {({ user }) => (
           <>
             <div className="market-header">
               <h1 className="market-title">
-                Create Your Own MarketPlace
+                Create Your MarketPlace
                 <Button
                   className="market-title-button"
                   icon="edit"
-                  size="large"
                   type="text"
                   onClick={() => this.setState({ addMarketDialog: true })}
                 />

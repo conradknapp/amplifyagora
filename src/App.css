@@ -98,8 +98,12 @@ body {
   color: green;
 }
 
-.text-red {
+.error {
   color: red;
+}
+
+.progress {
+  margin: 1em;
 }
 
 .dialog {
@@ -176,6 +180,12 @@ body {
 }
 
 .market-title {
+  font-weight: 300;
+  border-radius: 10px;
+  text-decoration: #f90 solid underline;
+  text-underline-position: under;
+  text-decoration-style: wavy;
+  font-size: 2.5rem;
   display: flex;
   color: var(--lightSquidInk);
   align-items: center;
@@ -184,6 +194,49 @@ body {
 .market-title-button {
   padding-left: 0.5em !important;
   color: #f90 !important;
+  font-size: 30px !important;
+}
+
+@media (min-width: 640px) {
+  .market-title {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 540px) {
+  .market-title {
+    font-size: 2.1rem;
+  }
+  .market-title-button {
+    font-size: 25px !important;
+  }
+}
+
+@media (max-width: 500px) {
+  .market-title {
+    font-size: 1.8rem;
+  }
+  .market-title-button {
+    font-size: 25px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .market-title {
+    font-size: 1.6rem;
+  }
+  .market-title-button {
+    font-size: 20px !important;
+  }
+}
+
+@media (max-width: 350px) {
+  .market-title {
+    font-size: 1.5rem;
+  }
+  .market-title-button {
+    font-size: 15px !important;
+  }
 }
 
 .image-preview {

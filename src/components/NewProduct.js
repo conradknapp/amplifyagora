@@ -3,7 +3,8 @@ import { Auth, Storage, API, graphqlOperation } from "aws-amplify";
 import { PhotoPicker } from "aws-amplify-react";
 import { createProduct } from "../graphql/mutations";
 import { convertDollarsToCents } from "../utils";
-import { Form, Button, Input, Notification } from "element-react";
+// prettier-ignore
+import { Form, Button, Input, Notification, Radio, Progress } from "element-react";
 import aws_exports from "../aws-exports";
 
 const initialState = {
@@ -11,13 +12,15 @@ const initialState = {
   image: "",
   imagePreview: "",
   price: "",
-  isUploading: false
+  shipped: true,
+  isUploading: false,
+  percentUploaded: 0
 };
 
 class NewProduct extends React.Component {
   state = { ...initialState };
 
-  handleSubmit = async event => {
+  handleAddProduct = async event => {
     event.preventDefault();
     this.setState({ isUploading: true });
     const visibility = "public";
@@ -27,8 +30,12 @@ class NewProduct extends React.Component {
     }`;
     const uploadedFile = await Storage.put(filename, this.state.image.file, {
       contentType: this.state.image.type,
-      progressCallback(progress) {
+      progressCallback: progress => {
         console.log(`Uploaded: ${progress.loaded}/${progress.total}`);
+        const percentUploaded = Math.round(
+          (progress.loaded / progress.total) * 100
+        );
+        this.setState({ percentUploaded });
       }
     });
     const file = {
@@ -39,6 +46,7 @@ class NewProduct extends React.Component {
     const input = {
       price: convertDollarsToCents(this.state.price),
       description: this.state.description,
+      shipped: this.state.shipped,
       productMarketId: this.props.marketId,
       file
     };
@@ -55,14 +63,22 @@ class NewProduct extends React.Component {
   };
 
   render() {
-    const { image, imagePreview, description, price, isUploading } = this.state;
+    const {
+      image,
+      imagePreview,
+      description,
+      price,
+      shipped,
+      isUploading,
+      percentUploaded
+    } = this.state;
 
     return (
       <>
         <h2 className="header">Add New Product</h2>
         <div className="market-header">
-          <Form onSubmit={this.handleSubmit} className="market-header">
-            <Form.Item label="Add Description">
+          <Form onSubmit={this.handleAddProduct} className="market-header">
+            <Form.Item label="Add Product Description">
               <Input
                 type="text"
                 icon="information"
@@ -71,20 +87,45 @@ class NewProduct extends React.Component {
                 onChange={description => this.setState({ description })}
               />
             </Form.Item>
-            <Form.Item label="Add Price">
+            <Form.Item label="Set Product Price">
               <Input
                 type="number"
                 icon="plus"
-                placeholder="Price (USD)"
+                placeholder="Price ($USD)"
                 value={price}
                 onChange={price => this.setState({ price })}
               />
+            </Form.Item>
+            <Form.Item label="Is the Product Shipped or Emailed to the Customer?">
+              <div className="text-center">
+                <Radio
+                  value="true"
+                  checked={shipped === true}
+                  onChange={() => this.setState({ shipped: true })}
+                >
+                  Shipped
+                </Radio>
+                <Radio
+                  value="false"
+                  checked={shipped === false}
+                  onChange={() => this.setState({ shipped: false })}
+                >
+                  Emailed
+                </Radio>
+              </div>
             </Form.Item>
             {imagePreview && (
               <img
                 className="image-preview"
                 src={imagePreview}
                 alt="Product Preview"
+              />
+            )}
+            {percentUploaded > 0 && (
+              <Progress
+                type="circle"
+                className="progress"
+                percentage={percentUploaded}
               />
             )}
             <PhotoPicker
@@ -110,7 +151,7 @@ class NewProduct extends React.Component {
             />
             <Form.Item>
               <Button
-                onClick={this.handleSubmit}
+                onClick={this.handleAddProduct}
                 disabled={!image || !description || !price || isUploading}
                 loading={isUploading}
                 type="primary"

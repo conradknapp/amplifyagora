@@ -10,6 +10,7 @@ export const getMarket = `query GetMarket($id: ID!) {
         id
         description
         price
+        shipped
         owner
         createdAt
       }
@@ -35,6 +36,7 @@ export const listMarkets = `query ListMarkets(
           id
           description
           price
+          shipped
           owner
           createdAt
         }
@@ -65,6 +67,7 @@ export const getProduct = `query GetProduct($id: ID!) {
       key
     }
     price
+    shipped
     owner
     createdAt
   }
@@ -92,6 +95,7 @@ export const listProducts = `query ListProducts(
         key
       }
       price
+      shipped
       owner
       createdAt
     }
@@ -103,6 +107,7 @@ export const getUser = `query GetUser($id: ID!) {
   getUser(id: $id) {
     id
     username
+    email
     registered
     orders {
       items {
@@ -134,6 +139,7 @@ export const searchMarkets = `query SearchMarkets(
           id
           description
           price
+          shipped
           owner
           createdAt
         }

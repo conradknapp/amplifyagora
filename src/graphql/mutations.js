@@ -10,6 +10,7 @@ export const createMarket = `mutation CreateMarket($input: CreateMarketInput!) {
         id
         description
         price
+        shipped
         owner
         createdAt
       }
@@ -30,6 +31,7 @@ export const updateMarket = `mutation UpdateMarket($input: UpdateMarketInput!) {
         id
         description
         price
+        shipped
         owner
         createdAt
       }
@@ -50,6 +52,7 @@ export const deleteMarket = `mutation DeleteMarket($input: DeleteMarketInput!) {
         id
         description
         price
+        shipped
         owner
         createdAt
       }
@@ -78,6 +81,7 @@ export const createProduct = `mutation CreateProduct($input: CreateProductInput!
       key
     }
     price
+    shipped
     owner
     createdAt
   }
@@ -100,6 +104,7 @@ export const updateProduct = `mutation UpdateProduct($input: UpdateProductInput!
       key
     }
     price
+    shipped
     owner
     createdAt
   }
@@ -122,6 +127,7 @@ export const deleteProduct = `mutation DeleteProduct($input: DeleteProductInput!
       key
     }
     price
+    shipped
     owner
     createdAt
   }
@@ -131,6 +137,23 @@ export const registerUser = `mutation RegisterUser($input: CreateUserInput!) {
   registerUser(input: $input) {
     id
     username
+    email
+    registered
+    orders {
+      items {
+        id
+        createdAt
+      }
+      nextToken
+    }
+  }
+}
+`;
+export const updateUser = `mutation UpdateUser($input: UpdateUserInput!) {
+  updateUser(input: $input) {
+    id
+    username
+    email
     registered
     orders {
       items {
@@ -149,13 +172,23 @@ export const createOrder = `mutation CreateOrder($input: CreateOrderInput!) {
       id
       description
       price
+      shipped
       owner
       createdAt
     }
     user {
       id
       username
+      email
       registered
+    }
+    shippingAddress {
+      city
+      country
+      address_line1
+      address_line2
+      address_state
+      address_zip
     }
     createdAt
   }

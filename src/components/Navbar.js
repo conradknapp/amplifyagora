@@ -32,7 +32,7 @@ const Navbar = ({ user, handleSignout }) => (
         </Nav.Item>
         <Nav.Item index="4">
           <Button type="warning" onClick={handleSignout}>
-            Signout
+            Sign Out
           </Button>
         </Nav.Item>
       </div>
