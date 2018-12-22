@@ -18,7 +18,7 @@ export const UserContext = React.createContext();
 class App extends React.Component {
   state = {
     user: null,
-    userProfile: null
+    userAttributes: null
   };
 
   componentDidMount() {
@@ -57,7 +57,7 @@ class App extends React.Component {
   getUserAttributes = async authUserData => {
     const userAttributes = await Auth.userAttributes(authUserData);
     const attributesObj = Auth.attributesToObject(userAttributes);
-    this.setState({ userProfile: attributesObj });
+    this.setState({ userAttributes: attributesObj });
   };
 
   registerNewUser = async signInData => {
@@ -93,12 +93,12 @@ class App extends React.Component {
   };
 
   render() {
-    const { user, userProfile } = this.state;
+    const { user, userAttributes } = this.state;
 
     return !user ? (
       <Authenticator theme={theme} />
     ) : (
-      <UserContext.Provider value={{ user, userProfile }}>
+      <UserContext.Provider value={{ user, userAttributes }}>
         <Router history={history}>
           <>
             {/* Navigation */}
@@ -110,13 +110,17 @@ class App extends React.Component {
               <Route
                 path="/profile"
                 component={() => (
-                  <ProfilePage user={user} userProfile={userProfile} />
+                  <ProfilePage user={user} userAttributes={userAttributes} />
                 )}
               />
               <Route
                 path="/markets/:marketId"
                 component={({ match }) => (
-                  <MarketPage marketId={match.params.marketId} user={user} />
+                  <MarketPage
+                    marketId={match.params.marketId}
+                    user={user}
+                    userAttributes={userAttributes}
+                  />
                 )}
               />
             </div>

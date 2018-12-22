@@ -41,7 +41,8 @@ class MarketPage extends React.Component {
   state = {
     market: null,
     isLoading: true,
-    isMarketOwner: false
+    isMarketOwner: false,
+    isEmailVerified: false
   };
 
   componentDidMount() {
@@ -103,9 +104,10 @@ class MarketPage extends React.Component {
     const result = await API.graphql(
       graphqlOperation(getMarket, { id: this.props.marketId })
     );
-    this.setState({ market: result.data.getMarket, isLoading: false }, () =>
-      this.checkMarketOwner()
-    );
+    this.setState({ market: result.data.getMarket, isLoading: false }, () => {
+      this.checkMarketOwner();
+      this.checkEmailVerified();
+    });
   };
 
   checkMarketOwner = () => {
@@ -116,8 +118,15 @@ class MarketPage extends React.Component {
     }
   };
 
+  checkEmailVerified = () => {
+    const { userAttributes } = this.props;
+    if (userAttributes) {
+      this.setState({ isEmailVerified: userAttributes.email_verified });
+    }
+  };
+
   render() {
-    const { market, isLoading, isMarketOwner } = this.state;
+    const { market, isLoading, isMarketOwner, isEmailVerified } = this.state;
 
     return isLoading ? (
       <Loading fullscreen={true} />
@@ -129,10 +138,10 @@ class MarketPage extends React.Component {
         </Link>
 
         {/* Market MetaData */}
-        <span className="items-center">
+        <span className="items-center pt-2">
           <h2 className="mb-mr">{market.name}</h2>• {market.owner}
         </span>
-        <div className="items-center">
+        <div className="items-center pt-2">
           <span style={{ color: "var(--lightSquidInk)", paddingBottom: "1em" }}>
             <Icon name="date" className="icon" />
             {formatProductDate(market.createdAt)}
@@ -151,7 +160,13 @@ class MarketPage extends React.Component {
               }
               name="1"
             >
-              <NewProduct marketId={market.id} />
+              {isEmailVerified ? (
+                <NewProduct marketId={market.id} />
+              ) : (
+                <Link className="header" to="/profile">
+                  Verify Your Email Before Adding Products
+                </Link>
+              )}
             </Tabs.Pane>
           )}
           <Tabs.Pane

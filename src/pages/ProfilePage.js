@@ -6,7 +6,7 @@ import { formatOrderDate, convertCentsToDollars } from "../utils";
 import { UserContext } from "../App";
 
 // Copy and bring in getUser query because queries file will be overwritten with any updates
-// NOTE! The 'product' part in order.items is added manually, along with sortDirection / limit on 'orders'
+// NOTE! The 'product' part in order.items is added manually, along with sortDirection / limit on 'orders', along with 'shippingAddress'
 const getUser = `query GetUser($id: ID!) {
   getUser(id: $id) {
     id
@@ -24,6 +24,14 @@ const getUser = `query GetUser($id: ID!) {
           owner
           price
         }
+        shippingAddress {
+          city
+          country
+          address_line1
+          address_line2
+          address_state
+          address_zip
+        }
       }
       nextToken
     }
@@ -34,7 +42,7 @@ const getUser = `query GetUser($id: ID!) {
 class ProfilePage extends React.Component {
   state = {
     orders: [],
-    email: this.props.userProfile && this.props.userProfile.email,
+    email: this.props.userAttributes && this.props.userAttributes.email,
     emailDialog: false,
     verificationCode: "",
     verificationForm: false,
@@ -43,11 +51,15 @@ class ProfilePage extends React.Component {
       { prop: "value", width: "330" },
       {
         prop: "tag",
-        width: "100",
+        width: "150",
         render: row => {
           if (row.name === "Email") {
-            const emailVerified = this.props.user.attributes.email_verified;
-            return emailVerified && <Tag type="success">Verified</Tag>;
+            const emailVerified = this.props.userAttributes.email_verified;
+            return emailVerified ? (
+              <Tag type="success">Verified</Tag>
+            ) : (
+              <Tag type="danger">Verify Email</Tag>
+            );
           }
         }
       },
@@ -84,8 +96,8 @@ class ProfilePage extends React.Component {
   };
 
   componentDidMount() {
-    if (this.props.userProfile) {
-      this.getUserOrders(this.props.userProfile);
+    if (this.props.userAttributes) {
+      this.getUserOrders(this.props.userAttributes);
     }
   }
 
@@ -127,13 +139,22 @@ class ProfilePage extends React.Component {
         }
       })
       .catch(() => {
-        Message({ type: "info", message: "Delete canceled" });
+        Message({
+          type: "info",
+          message: "Delete canceled"
+        });
       });
   };
 
   sendVerificationCode = async attr => {
+    // verify current user attribute will send an email. Keep in mind that it is rate limited
     await Auth.verifyCurrentUserAttribute(attr);
     this.setState({ verificationForm: true });
+    Message({
+      type: "info",
+      customClass: "message",
+      message: `Verification code sent to ${this.state.email}`
+    });
   };
 
   handleVerifyEmail = async attr => {
@@ -168,9 +189,9 @@ class ProfilePage extends React.Component {
 
     return (
       <UserContext.Consumer>
-        {({ user, userProfile }) =>
+        {({ user, userAttributes }) =>
           user &&
-          userProfile && (
+          userAttributes && (
             <>
               <Tabs activeName="1" className="profile-tabs">
                 <Tabs.Pane
@@ -196,11 +217,11 @@ class ProfilePage extends React.Component {
                       },
                       {
                         name: "Email",
-                        value: userProfile.email
+                        value: userAttributes.email
                       },
                       {
                         name: "Phone Number",
-                        value: userProfile.phone_number
+                        value: userAttributes.phone_number
                       },
                       {
                         name: "Delete Profile",
@@ -228,12 +249,31 @@ class ProfilePage extends React.Component {
                       <Card>
                         <pre>
                           <p>Order Id: {order.id}</p>
-                          <p>Description: {order.product.description}</p>
+                          {/* <p>Owner Id: {order.product.owner}</p> */}
+                          <p>
+                            Product Description: {order.product.description}
+                          </p>
                           <p>
                             Price: ${convertCentsToDollars(order.product.price)}
                           </p>
-                          <p>Owner: {order.product.owner}</p>
                           <p>Purchased at {formatOrderDate(order.createdAt)}</p>
+                          {order.shippingAddress && (
+                            <>
+                              Shipping Address
+                              <div className="ml-2">
+                                <p>
+                                  {order.shippingAddress.address_line1},{" "}
+                                  {order.shippingAddress.address_state}{" "}
+                                </p>
+                                <p>{order.shippingAddress.address_line2}</p>
+                                <p>
+                                  {order.shippingAddress.city},{" "}
+                                  {order.shippingAddress.country}{" "}
+                                  {order.shippingAddress.address_zip}
+                                </p>
+                              </div>
+                            </>
+                          )}
                         </pre>
                       </Card>
                     </div>

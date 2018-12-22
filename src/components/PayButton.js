@@ -11,7 +11,7 @@ const stripeConfig = {
   publishableAPIKey: "pk_test_CN8uG9E9KDNxI7xVtdN1U5Be"
 };
 
-const PayButton = ({ product, user }) => {
+const PayButton = ({ product, userAttributes }) => {
   const getOwnerEmail = async ownerId => {
     try {
       const input = { id: ownerId };
@@ -36,24 +36,31 @@ const PayButton = ({ product, user }) => {
       // first get owner's current email to email them about purchase
       const ownerEmail = await getOwnerEmail(product.owner);
       console.log({ ownerEmail });
-      // charge buyer, then email buyer and seller (in Lambda)
+      // charge buyer
       const result = await API.post("orderlambda", "/charge", {
         body: {
           token,
+          shipped: product.shipped,
           charge: {
             currency: stripeConfig.currency,
             amount: product.price,
-            description: product.description,
+            description: product.description
+          },
+          email: {
+            customerEmail: userAttributes.email,
             ownerEmail
           }
         }
       });
+      console.log({ result });
       if (result.charge.status === "succeeded") {
-        console.log({ result });
+        let shippingAddress = null;
+        if (product.shipped) {
+          shippingAddress = createShippingAddress(result.charge.source);
+        }
         // If charge was successful, associate the order data with User
-        const shippingAddress = createShippingAddress(result.charge.source);
         const input = {
-          orderUserId: user.attributes.sub,
+          orderUserId: userAttributes.sub,
           orderProductId: product.id,
           shippingAddress
         };
@@ -90,7 +97,7 @@ const PayButton = ({ product, user }) => {
 
   return (
     <StripeCheckout
-      email={user.attributes.email}
+      email={userAttributes.email}
       name={product.description}
       token={handleCharge}
       amount={product.price}

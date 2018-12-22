@@ -74,9 +74,9 @@ class NewProduct extends React.Component {
     } = this.state;
 
     return (
-      <>
+      <div className="flex-center">
         <h2 className="header">Add New Product</h2>
-        <div className="market-header">
+        <div>
           <Form onSubmit={this.handleAddProduct} className="market-header">
             <Form.Item label="Add Product Description">
               <Input
@@ -135,10 +135,19 @@ class NewProduct extends React.Component {
               onPick={file => this.setState({ image: file })}
               theme={{
                 formContainer: {
+                  // brings the photo picker closer to the added button
                   margin: 0,
-                  padding: "0.8em",
-                  minWidth: "250px",
-                  maxHeight: "300px"
+                  padding: "0.8em"
+                },
+                formSection: {
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center"
+                },
+                sectionBody: {
+                  margin: 0,
+                  width: "250px"
                 },
                 sectionHeader: {
                   padding: "0.2em",
@@ -161,7 +170,7 @@ class NewProduct extends React.Component {
             </Form.Item>
           </Form>
         </div>
-      </>
+      </div>
     );
   }
 }
