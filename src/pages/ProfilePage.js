@@ -256,18 +256,15 @@ class ProfilePage extends React.Component {
                           <p>
                             Price: ${convertCentsToDollars(order.product.price)}
                           </p>
-                          <p>Purchased at {formatOrderDate(order.createdAt)}</p>
+                          <p>Purchased on {formatOrderDate(order.createdAt)}</p>
                           {order.shippingAddress && (
                             <>
                               Shipping Address
                               <div className="ml-2">
-                                <p>
-                                  {order.shippingAddress.address_line1},{" "}
-                                  {order.shippingAddress.address_state}{" "}
-                                </p>
-                                <p>{order.shippingAddress.address_line2}</p>
+                                <p>{order.shippingAddress.address_line1} </p>
                                 <p>
                                   {order.shippingAddress.city},{" "}
+                                  {order.shippingAddress.address_state}{" "}
                                   {order.shippingAddress.country}{" "}
                                   {order.shippingAddress.address_zip}
                                 </p>

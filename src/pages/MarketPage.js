@@ -68,7 +68,7 @@ class MarketPage extends React.Component {
         const prevProducts = this.state.market.products.items.filter(
           item => item.id !== createdProduct.id
         );
-        const updatedItems = [...prevProducts, createdProduct];
+        const updatedItems = [createdProduct, ...prevProducts];
         const market = { ...this.state.market };
         market.products.items = updatedItems;
         this.setState({ market });

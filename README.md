@@ -2,18 +2,22 @@
 type Market @model @searchable {
   id: ID!
   name: String!
-  products: [Product] @connection(name: "MarketProducts")
-  tags: [String]
+  products: [Product]
+    @connection(name: "MarketProducts", sortField: "createdAt")
+  tags: [String!]
   owner: String!
   createdAt: String
 }
 
-type Product @model @auth(rules: [{ allow: owner }]) {
+# Can change the field that the 'owner' is put on with 'ownerField'
+
+type Product @model @auth(rules: [{ allow: owner, identityField: "sub" }]) {
   id: ID!
   description: String!
   market: Market @connection(name: "MarketProducts")
   file: S3Object!
   price: Float!
+  shipped: Boolean!
   owner: String
   createdAt: String
 }
@@ -26,14 +30,15 @@ type S3Object {
 
 type User
   @model(
-    mutations: { create: "registerUser" }
+    mutations: { create: "registerUser", update: "updateUser" }
     queries: { get: "getUser" }
     subscriptions: null
   ) {
   id: ID!
   username: String!
+  email: String!
   registered: Boolean
-  orders: [Order] @connection(name: "UserOrders")
+  orders: [Order] @connection(name: "UserOrders", sortField: "createdAt")
 }
 
 type Order
@@ -45,7 +50,16 @@ type Order
   id: ID!
   product: Product @connection
   user: User @connection(name: "UserOrders")
+  shippingAddress: ShippingAddress
   createdAt: String
+}
+
+type ShippingAddress {
+  city: String!
+  country: String!
+  address_line1: String!
+  address_state: String!
+  address_zip: String!
 }
 ```
 
